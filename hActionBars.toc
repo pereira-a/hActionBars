@@ -1,0 +1,10 @@
+## Interface: 120001
+## Interface-Retail: 120001
+## Title: hActionBars
+## Notes: Toggle action bars via a keybind. Use /hab to configure. Set keybind in Key Bindings > AddOns > hActionBars.
+## Author: SkunFly
+## Version: 0.0.1
+## SavedVariables: hActionBarsDB
+## Bindings: Bindings.xml
+
+hActionBars.lua
