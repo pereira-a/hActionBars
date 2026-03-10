@@ -1,0 +1,24 @@
+name: "Release Workflow"
+
+on:
+push:
+  tags:
+    - '*-release'
+
+env:
+  CF_API_KEY: ${{ secrets.CF_API_KEY }}
+  GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: BigWigsMods/packager@v2.5.1
+      - uses: marvinpinto/action-automatic-releases@d68defdd11f9dcc7f52f35c1b7c236ee7513bcc1
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          files: |
+            hActionBars*.zip
