@@ -90,21 +90,6 @@ local function ApplyAll()
     for _, bar in ipairs(BARS) do ApplyBar(bar.name) end
 end
 
-local function HookBars()
-    for _, bar in ipairs(BARS) do
-        local f = _G[bar.name]
-        if f then
-            local barName = bar.name
-            f:HookScript("OnShow", function(self)
-                if AreHidden() and IsSelected(barName) then
-                    self:SetAlpha(0)
-                    self:Hide()
-                end
-            end)
-        end
-    end
-end
-
 -- ============================================================
 -- BINDING WIRING
 -- SetBindingClick is more reliable than <ButtonArray> in WoW 12.
@@ -320,11 +305,7 @@ ev:RegisterEvent("UPDATE_BINDINGS")
 ev:SetScript("OnEvent", function(_, event, arg1)
     if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
         InitDB()
-        HookBars()
         print("hActionBars: initialized (addon name matched: " .. tostring(ADDON_NAME) .. ")")
-
-    elseif event == "ADDON_LOADED" and arg1 ~= ADDON_NAME then
-        -- Fires for every addon load — only log our own name mismatch once to avoid spam.
        
     elseif event == "PLAYER_ENTERING_WORLD" then
         ApplyBindingClick()
