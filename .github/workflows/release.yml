@@ -1,9 +1,9 @@
 name: "Release Workflow"
 
 on:
-push:
-  tags:
-    - '*-release'
+  push:
+    tags:
+      - '*-release'
 
 env:
   CF_API_KEY: ${{ secrets.CF_API_KEY }}
