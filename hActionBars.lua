@@ -187,9 +187,9 @@ local function BuildUI()
 
     f.TitleText:SetText("hActionBars")
 
-    -- Status label (top-right of title bar)
+    -- Status label (below title)
     local statusLabel = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    statusLabel:SetPoint("RIGHT", f, "RIGHT", -32, -(TITLE_H / 2 - 8))
+    statusLabel:SetPoint("TOP", f, "TOP", 0, -TITLE_H + 4)
     f.RefreshStatus = function(self)
         statusLabel:SetText(StatusColor() .. (AreHidden() and "HIDDEN|r" or "SHOWN|r"))
     end
