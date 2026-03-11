@@ -4,7 +4,7 @@
 ## Notes: Toggle action bars via a keybind. Use /hab to configure. Set keybind in Key Bindings > AddOns > hActionBars.
 ## Author: pereira-a
 ## X-Curse-Project-ID: 1482273
-## Version: 0.0.1
+## Version: 0.0.2
 ## SavedVariables: hActionBarsDB
 ## Bindings: Bindings.xml
 
