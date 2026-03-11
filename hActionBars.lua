@@ -101,14 +101,12 @@ local function ApplyBindingClick()
     local key1, key2 = GetBindingKey("HACTIONBARS_TOGGLE")
     if key1 then
         SetBindingClick(key1, "hActionBarsVirtualButton", "LeftButton")
-        print("hActionBars: wired key " .. key1 .. " -> virtual button")
     end
     if key2 then
         SetBindingClick(key2, "hActionBarsVirtualButton", "LeftButton")
-        print("hActionBars: wired key " .. key2 .. " -> virtual button")
     end
-    if not key1 and not key2 then
-        print("hActionBars: no key bound to HACTIONBARS_TOGGLE — set one in Key Bindings > AddOns > hActionBars")
+    if uiPanel and uiPanel.RefreshBindingHint then
+        uiPanel:RefreshBindingHint(key1, key2)
     end
 end
 
@@ -171,6 +169,24 @@ local ROW_H    = 24
 
 local function StatusColor()
     return AreHidden() and "|cFFFF6600" or "|cFF44FF44"
+end
+
+local function GetToggleBindingKeys()
+    local key1, key2 = GetBindingKey("HACTIONBARS_TOGGLE")
+    if key1 or key2 then
+        return key1, key2
+    end
+    return GetBindingKey("CLICK hActionBarsVirtualButton:LeftButton")
+end
+
+local function FormatBindingHint(key1, key2)
+    if key1 or key2 then
+        local keys = {}
+        if key1 then keys[#keys + 1] = key1 end
+        if key2 then keys[#keys + 1] = key2 end
+        return "|cFF888888Keybind: " .. table.concat(keys, " / ") .. "|r"
+    end
+    return "|cFFFF6600No keybind set. Use Key Bindings > AddOns > hActionBars.|r"
 end
 
 local function BuildUI()
@@ -266,7 +282,13 @@ local function BuildUI()
 
     local hint = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     hint:SetPoint("BOTTOM", f, "BOTTOM", 0, PAD)
-    hint:SetText("|cFF888888Keybind: Key Bindings > AddOns > hActionBars|r")
+    f.RefreshBindingHint = function(self, key1, key2)
+        if not key1 and not key2 then
+            key1, key2 = GetToggleBindingKeys()
+        end
+        hint:SetText(FormatBindingHint(key1, key2))
+    end
+    f:RefreshBindingHint()
 
     return f
 end
@@ -283,6 +305,7 @@ local function ToggleUI()
             end
         end
         uiPanel:RefreshStatus()
+        if uiPanel.RefreshBindingHint then uiPanel:RefreshBindingHint() end
         uiPanel:Show()
     end
 end
