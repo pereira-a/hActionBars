@@ -237,11 +237,9 @@ local function BuildUI()
     btnAll:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", PAD, btnY)
     btnAll:SetText("Select All")
     btnAll:SetScript("OnClick", function()
+        for _, bar in ipairs(BARS) do SetSelected(bar.name, true) end
         for _, bar in ipairs(BARS) do
-            if _G[bar.name] then SetSelected(bar.name, true) end
-        end
-        for _, bar in ipairs(BARS) do
-            if cbMap[bar.name] then cbMap[bar.name]:SetChecked(IsSelected(bar.name)) end
+            if cbMap[bar.name] then cbMap[bar.name]:SetChecked(true) end
         end
         ApplyAll()
     end)
