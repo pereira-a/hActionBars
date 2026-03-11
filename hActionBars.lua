@@ -222,9 +222,15 @@ local function BuildUI()
     -- Buttons (anchored to panel bottom, outside the scroll frame)
     local btnY = PAD + 14 + 6   -- above hint text
 
+    local BTN_W = 86
+    local BTN_H = 22
+    local BTN_GAP = 6
+    local totalBtnW = (BTN_W * 3) + (BTN_GAP * 2)
+    local btnLeftX = math.floor((PANEL_W - totalBtnW) / 2)
+
     local btnAll = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    btnAll:SetSize(86, 22)
-    btnAll:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", PAD, btnY)
+    btnAll:SetSize(BTN_W, BTN_H)
+    btnAll:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", btnLeftX, btnY)
     btnAll:SetText("Select All")
     btnAll:SetScript("OnClick", function()
         for _, bar in ipairs(BARS) do SetSelected(bar.name, true) end
@@ -235,8 +241,8 @@ local function BuildUI()
     end)
 
     local btnNone = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    btnNone:SetSize(86, 22)
-    btnNone:SetPoint("LEFT", btnAll, "RIGHT", 6, 0)
+    btnNone:SetSize(BTN_W, BTN_H)
+    btnNone:SetPoint("LEFT", btnAll, "RIGHT", BTN_GAP, 0)
     btnNone:SetText("Clear All")
     btnNone:SetScript("OnClick", function()
         for _, bar in ipairs(BARS) do SetSelected(bar.name, false) end
@@ -247,8 +253,8 @@ local function BuildUI()
     end)
 
     local btnToggle = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    btnToggle:SetSize(86, 22)
-    btnToggle:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -28, btnY)
+    btnToggle:SetSize(BTN_W, BTN_H)
+    btnToggle:SetPoint("LEFT", btnNone, "RIGHT", BTN_GAP, 0)
     btnToggle:SetText("Toggle Now")
     btnToggle:SetScript("OnClick", function()
         hActionBars_Toggle()
