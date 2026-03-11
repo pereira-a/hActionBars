@@ -120,7 +120,6 @@ end
 local uiPanel = nil  -- forward-declared; BuildUI sets it
 
 function hActionBars_Toggle()
-    print("hActionBars: toggle command received")
 
     if not hActionBarsDB then
         print("hActionBars: ERROR - DB is nil (ADDON_LOADED may not have fired yet)")
@@ -141,11 +140,9 @@ function hActionBars_Toggle()
         end
     end
 
-    local stateStr = AreHidden() and "HIDING" or "SHOWING"
     if #sel == 0 and #missing == 0 then
-        print("hActionBars: " .. stateStr .. " - no bars selected (open /hab and check some boxes)")
+        print("hActionBars: no bars selected (open /hab and check some action bars to toggle)")
     else
-        print("hActionBars: " .. stateStr .. " " .. #sel .. " bar(s): " .. table.concat(sel, ", "))
         if #missing > 0 then
             print("hActionBars: WARNING - selected but frame not found: " .. table.concat(missing, ", "))
         end
