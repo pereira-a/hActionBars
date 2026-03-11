@@ -1,11 +1,5 @@
 <Bindings>
-    <!--
-        <run> is NOT a valid Bindings.xml element — WoW silently ignores it.
-        <ButtonArray> is the correct mechanism: when the bound key is pressed,
-        WoW programmatically clicks the named Button frame, triggering its OnClick.
-        The frame "hActionBarsVirtualButton" is created in hActionBars.lua.
-    -->
     <Binding name="HACTIONBARS_TOGGLE" header="HACTIONBARS" category="ADDONS">
-        <ButtonArray name="hActionBarsVirtualButton"/>
+        if hActionBars_Toggle then hActionBars_Toggle() end
     </Binding>
 </Bindings>

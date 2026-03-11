@@ -13,21 +13,6 @@ local ADDON_NAME = ...
 BINDING_HEADER_HACTIONBARS      = "hActionBars"
 BINDING_NAME_HACTIONBARS_TOGGLE = "Toggle Selected Bars"
 
--- Virtual button for <ButtonArray> in Bindings.xml.
--- MUST be a named global Button frame that exists before the user presses the key.
--- Positioned at the bottom-left corner of UIParent (1px inside bounds so WoW
--- considers it a valid click target). Alpha=0 makes it invisible.
-do
-    local vBtn = CreateFrame("Button", "hActionBarsVirtualButton", UIParent)
-    vBtn:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 1)
-    vBtn:SetSize(1, 1)
-    vBtn:SetAlpha(0)
-    vBtn:RegisterForClicks("AnyUp")
-    vBtn:SetScript("OnClick", function()
-        if hActionBars_Toggle then hActionBars_Toggle() end
-    end)
-end
-
 -- ============================================================
 -- BAR DEFINITIONS
 -- ============================================================
@@ -69,6 +54,8 @@ local function IsSelected(name) return hActionBarsDB.selected[name] == true end
 local function SetSelected(name, v) hActionBarsDB.selected[name] = v or nil end
 local function AreHidden() return hActionBarsDB.hidden == true end
 
+local uiPanel = nil
+
 -- ============================================================
 -- BAR CONTROL
 -- ============================================================
@@ -91,31 +78,21 @@ local function ApplyAll()
 end
 
 -- ============================================================
--- BINDING WIRING
--- SetBindingClick is more reliable than <ButtonArray> in WoW 12.
--- Called on PLAYER_ENTERING_WORLD and UPDATE_BINDINGS so the
--- binding stays correct after the user changes it in the UI.
+-- BINDING STATUS
+-- The actual keybind is defined in Bindings.xml via <ButtonArray>.
+-- We only read binding state to update the /hab panel hint.
 -- ============================================================
 
-local function ApplyBindingClick()
-    local key1, key2 = GetBindingKey("HACTIONBARS_TOGGLE")
-    if key1 then
-        SetBindingClick(key1, "hActionBarsVirtualButton", "LeftButton")
-    end
-    if key2 then
-        SetBindingClick(key2, "hActionBarsVirtualButton", "LeftButton")
-    end
+local function RefreshBindingHintUI()
     if uiPanel and uiPanel.RefreshBindingHint then
-        uiPanel:RefreshBindingHint(key1, key2)
+        uiPanel:RefreshBindingHint()
     end
 end
 
 -- ============================================================
--- TOGGLE  — called by the virtual button's OnClick and /hab toggle
+-- TOGGLE  -- called by the virtual button's OnClick and /hab toggle
 -- Global so the virtual button's OnClick can reach it.
 -- ============================================================
-
-local uiPanel = nil  -- forward-declared; BuildUI sets it
 
 function hActionBars_Toggle()
 
@@ -172,11 +149,7 @@ local function StatusColor()
 end
 
 local function GetToggleBindingKeys()
-    local key1, key2 = GetBindingKey("HACTIONBARS_TOGGLE")
-    if key1 or key2 then
-        return key1, key2
-    end
-    return GetBindingKey("CLICK hActionBarsVirtualButton:LeftButton")
+    return GetBindingKey("HACTIONBARS_TOGGLE")
 end
 
 local function FormatBindingHint(key1, key2)
@@ -186,6 +159,7 @@ local function FormatBindingHint(key1, key2)
         if key2 then keys[#keys + 1] = key2 end
         return "|cFF888888Keybind: " .. table.concat(keys, " / ") .. "|r"
     end
+
     return "|cFFFF6600No keybind set. Use Key Bindings > AddOns > hActionBars.|r"
 end
 
@@ -282,10 +256,8 @@ local function BuildUI()
 
     local hint = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     hint:SetPoint("BOTTOM", f, "BOTTOM", 0, PAD)
-    f.RefreshBindingHint = function(self, key1, key2)
-        if not key1 and not key2 then
-            key1, key2 = GetToggleBindingKeys()
-        end
+    f.RefreshBindingHint = function(self)
+        local key1, key2 = GetToggleBindingKeys()
         hint:SetText(FormatBindingHint(key1, key2))
     end
     f:RefreshBindingHint()
@@ -326,14 +298,14 @@ ev:SetScript("OnEvent", function(_, event, arg1)
         print("hActionBars: initialized (addon name matched: " .. tostring(ADDON_NAME) .. ")")
        
     elseif event == "PLAYER_ENTERING_WORLD" then
-        ApplyBindingClick()
+        RefreshBindingHintUI()
         ApplyAll()
 
     elseif event == "PLAYER_REGEN_ENABLED" then
         ApplyAll()
 
     elseif event == "UPDATE_BINDINGS" then
-        ApplyBindingClick()
+        RefreshBindingHintUI()
     end
 end)
 
