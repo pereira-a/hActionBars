@@ -66,10 +66,8 @@ local function ApplyBar(name)
     if not f then return end
     if AreHidden() then
         f:SetAlpha(0)  -- works even on Edit Mode protected frames (e.g. MainMenuBar)
-        f:Hide()       -- also hide when possible; silently ignored if frame is protected
     else
         f:SetAlpha(1)
-        f:Show()       -- no-op if still shown; SetAlpha(1) handles the protected case
     end
 end
 
