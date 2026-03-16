@@ -303,7 +303,6 @@ ev:RegisterEvent("UPDATE_BINDINGS")
 ev:SetScript("OnEvent", function(_, event, arg1)
     if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
         InitDB()
-        print("hActionBars: initialized (addon name matched: " .. tostring(ADDON_NAME) .. ")")
        
     elseif event == "PLAYER_ENTERING_WORLD" then
         RefreshBindingHintUI()
