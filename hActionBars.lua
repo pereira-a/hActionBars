@@ -15,25 +15,29 @@ BINDING_NAME_HACTIONBARS_TOGGLE = "Toggle Selected Bars"
 
 -- ============================================================
 -- BAR DEFINITIONS
+-- Each entry has a name (logical key for saved data), a label,
+-- and a list of global frame names to try in order. The first
+-- frame that exists in _G is used (EUI frames take priority
+-- when present, falling back to Blizzard defaults otherwise).
 -- ============================================================
 
 local BARS = {
     -- Action bars
-    { name = "MainActionBar",           label = "Main Action Bar"            },
-    { name = "MultiBarBottomLeft",      label = "Extra Bar"                  },
-    { name = "MultiBarBottomRight",     label = "Extra Bar 3"                },
-    { name = "MultiBarRight",           label = "Extra Bar 4"                },
-    { name = "MultiBarLeft",            label = "Extra Bar 5"               },
-    { name = "MultiBar5",               label = "Extra Bar 6"                },
-    { name = "MultiBar6",               label = "Extra Bar 7"                },
-    { name = "MultiBar7",               label = "Extra Bar 8"                },
-    -- Special bars 
-    { name = "ShapeshiftBarFrame",      label = "Stance / Shapeshift Bar"    },
-    { name = "PetActionBarFrame",       label = "Pet Bar"                    },
-    { name = "ExtraActionBarFrame",     label = "Extra Action Bar"           },
-    { name = "ZoneAbilityFrame",        label = "Zone Ability Bar"           },
-    { name = "OverrideActionBar",       label = "Override / Vehicle Bar"     },
-    { name = "MicroButtonAndBagsBar",   label = "Micro Menu & Bags"          },
+    { name = "MainActionBar",           label = "Main Action Bar",            frames = { "EABBar_MainBar",       "MainActionBar"        } },
+    { name = "MultiBarBottomLeft",      label = "Extra Bar",                  frames = { "EABBar_Bar2",          "MultiBarBottomLeft"   } },
+    { name = "MultiBarBottomRight",     label = "Extra Bar 3",                frames = { "EABBar_Bar3",          "MultiBarBottomRight"  } },
+    { name = "MultiBarRight",           label = "Extra Bar 4",                frames = { "EABBar_Bar4",          "MultiBarRight"        } },
+    { name = "MultiBarLeft",            label = "Extra Bar 5",                frames = { "EABBar_Bar5",          "MultiBarLeft"         } },
+    { name = "MultiBar5",               label = "Extra Bar 6",                frames = { "EABBar_Bar6",          "MultiBar5"            } },
+    { name = "MultiBar6",               label = "Extra Bar 7",                frames = { "EABBar_Bar7",          "MultiBar6"            } },
+    { name = "MultiBar7",               label = "Extra Bar 8",                frames = { "EABBar_Bar8",          "MultiBar7"            } },
+    -- Special bars
+    { name = "ShapeshiftBarFrame",      label = "Stance / Shapeshift Bar",    frames = { "EABBar_StanceBar",     "ShapeshiftBarFrame"   } },
+    { name = "PetActionBarFrame",       label = "Pet Bar",                    frames = { "EABBar_PetBar",        "PetActionBarFrame"    } },
+    { name = "ExtraActionBarFrame",     label = "Extra Action Bar",           frames = { "ExtraActionBarFrame"                         } },
+    { name = "ZoneAbilityFrame",        label = "Zone Ability Bar",           frames = { "ZoneAbilityFrame"                             } },
+    { name = "OverrideActionBar",       label = "Override / Vehicle Bar",     frames = { "OverrideActionBar"                            } },
+    { name = "MicroButtonAndBagsBar",   label = "Micro Menu & Bags",          frames = { "MicroMenuContainer",   "BagsBar", "MicroButtonAndBagsBar" } },
 }
 
 -- ============================================================
@@ -60,9 +64,21 @@ local uiPanel = nil
 -- BAR CONTROL
 -- ============================================================
 
+local function ResolveFrame(bar)
+    for _, frameName in ipairs(bar.frames) do
+        local f = _G[frameName]
+        if f then return f, frameName end
+    end
+    return nil, nil
+end
+
 local function ApplyBar(name)
     if not IsSelected(name) then return end  -- never touch bars outside the toggle group
-    local f = _G[name]
+    -- Find the bar definition and resolve its frame.
+    local bar
+    for _, b in ipairs(BARS) do if b.name == name then bar = b; break end end
+    if not bar then return end
+    local f = ResolveFrame(bar)
     if not f then return end
     if AreHidden() then
         f:SetAlpha(0)  -- works even on Edit Mode protected frames (e.g. MainMenuBar)
@@ -105,10 +121,11 @@ function hActionBars_Toggle()
     local sel, missing = {}, {}
     for _, bar in ipairs(BARS) do
         if IsSelected(bar.name) then
-            if _G[bar.name] then
-                sel[#sel + 1] = bar.name
+            local f, resolvedName = ResolveFrame(bar)
+            if f then
+                sel[#sel + 1] = resolvedName
             else
-                missing[#missing + 1] = bar.name   -- selected but frame does not exist
+                missing[#missing + 1] = bar.name
             end
         end
     end
@@ -301,8 +318,13 @@ ev:RegisterEvent("PLAYER_REGEN_ENABLED")
 ev:RegisterEvent("UPDATE_BINDINGS")
 
 ev:SetScript("OnEvent", function(_, event, arg1)
-    if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
-        InitDB()
+    if event == "ADDON_LOADED" then
+        if arg1 == ADDON_NAME then
+            InitDB()
+        elseif arg1 == "EllesmereUIActionBars" then
+            -- EUI creates replacement bar frames; re-apply after they exist.
+            C_Timer.After(0.2, ApplyAll)
+        end
        
     elseif event == "PLAYER_ENTERING_WORLD" then
         RefreshBindingHintUI()
